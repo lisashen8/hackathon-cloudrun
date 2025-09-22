@@ -10,9 +10,7 @@ You'll deploy a **Production Gemma3 Agent** with conversational capabilities:
 **Gemma Agent** (GPU-Accelerated):
 
 - General conversations and Q&A
-- Educational explanations
 - Creative writing assistance
-- GPU-accelerated inference for fast responses
 - Production-ready deployment on Cloud Run
 
 ## 📋 Prerequisites
