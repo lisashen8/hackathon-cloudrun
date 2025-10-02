@@ -135,10 +135,23 @@ Your production ADK agent is now running on Cloud Run with GPU acceleration!
 Interact with your agent by entering the SERVICE_URL above for your production-adk-agent into a new browser tab. You should see the ADK web interface.
 
 **Try these queries:**
-
 **Gemma Agent** (Conversational):
 
 - "Tell me about artificial intelligence"
 - "What are some creative writing tips?"
 - "Explain quantum computing in simple terms"
 - "Can you help me brainstorm ideas for a blog post?"
+
+  ## Clean up
+Follow these steps to delete the resources you created in this lab to avoid incurring further charges.
+
+Examples of how to delete the two Cloud Run services that were deployed in this repo. You can also delete them in the Cloud Run Web Console page. 
+Please also remember to delete other Google Cloud resources you may have used. 
+
+```bash
+#Delete the ADK agent Cloud Run service:
+gcloud run services delete production-adk-agent -region europe-west1
+# Delete the Gemma backend Cloud Run service: 
+gcloud run services delete ollama-gemma3-4b-gpu --region europe-west1
+
+```
