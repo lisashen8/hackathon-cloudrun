@@ -137,10 +137,8 @@ Interact with your agent by entering the SERVICE_URL above for your production-a
 **Try these queries:**
 **Gemma Agent** (Conversational):
 
-- "Tell me about artificial intelligence"
-- "What are some creative writing tips?"
-- "Explain quantum computing in simple terms"
-- "Can you help me brainstorm ideas for a blog post?"
+- "What is the color of a polar bear's skin ?"
+- "What is the primary food source of a Giant Panda, a frequently exhibited endangered species?"
 
   ## Clean up
 Follow these steps to delete the resources you created in this lab to avoid incurring further charges.
