@@ -15,6 +15,11 @@
 # This Python script is the entry point for your web service. It uses the FastAPI 
 # framework to create a web server that exposes your ADK (Agent Development Kit) agent,
 # making it accessible over HTTP.
+# 
+# What does this file do: 
+# 1 Creates a FastAPI server with ADK integration
+# 2 Enables the web interface for testing
+# 3 Provides health check endpoints
 
 import os
 from typing import Literal
