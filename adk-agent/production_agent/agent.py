@@ -14,14 +14,14 @@
 
 import os
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
-from dotenv import load_dotenv
-from google.adk.agents import LlmAgent, Agent
-from google.adk.tools import google_search
-from google.adk.models.lite_llm import LiteLlm
-from google.cloud import logging as google_cloud_logging
 import google.auth
+from dotenv import load_dotenv
+from google.adk.agents import Agent, LlmAgent
+from google.adk.models.lite_llm import LiteLlm
+from google.adk.tools import google_search
+from google.cloud import logging as google_cloud_logging
 
 # Load environment variables from .env file in root directory
 root_dir = Path(__file__).parent.parent
@@ -46,14 +46,22 @@ logger = logging_client.logger("production-adk-agent")
 
 # Configure the deployed model endpoint
 gemma_model_name = os.getenv("GEMMA_MODEL_NAME", "gemma3:4b")  # Gemma model name
-api_base = os.getenv("OLLAMA_API_BASE", "http://localhost:10010")  # Location of Ollama server
+os.environ["OLLAMA_API_BASE"] = os.getenv("OLLAMA_API_BASE", "http://localhost:10010")
+if os.getenv("USE_OPENAI_FAKE", "False").lower() in ('true', '1', 't'): # See: Allows context based chat with multi-modal: https://github.com/google/adk-python/issues/49
+    os.environ["OPENAI_API_BASE"] = os.getenv("OLLAMA_API_BASE", "") + "/v1"
+    os.environ["OPENAI_API_KEY"] = "undefined"
+    model=LiteLlm(model=f"openai/{gemma_model_name}")
+elif os.getenv("USE_OLLAMA_NO_CONTEXT", "False").lower() in ('true', '1', 't'): # Allows multi-modal via direct ollama API, but might loose context
+    model=LiteLlm(model=f"ollama/{gemma_model_name}")
+else:   # Direct via ollama with context, but current has issues with multi modal
+    model=LiteLlm(model=f"ollama_chat/{gemma_model_name}")
 
 # Production Gemma Agent - GPU-accelerated conversational assistant
 # 1. Connects to your deployed Gemma backend via LiteLlm
 # 2. Creates a simple conversational agent
 # 3. Configures Google Cloud integration
 production_agent = Agent(
-    model=LiteLlm(model=f"ollama_chat/{gemma_model_name}", api_base=api_base),
+    model=model,
     name="production_agent",
     description="A production-ready conversational assistant powered by GPU-accelerated Gemma.",
     instruction="""You are 'Gem', a friendly, knowledgeable, and enthusiastic zoo tour guide. 
