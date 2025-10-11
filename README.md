@@ -133,10 +133,40 @@ gcloud run deploy production-adk-agent \
     --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
     --set-env-vars GOOGLE_CLOUD_LOCATION=europe-west1 \
     --set-env-vars GEMMA_MODEL_NAME=gemma3:4b \
-    --set-env-vars OLLAMA_API_BASE=$OLLAMA_URL
+    --set-env-vars OLLAMA_API_BASE=$OLLAMA_URL \
+    --set-env-vars USE_OPENAI_FAKE=True
 
 gcloud run services update production-adk-agent --no-invoker-iam-check
 ```
+
+### Understanding some env variables:
+
+### Environment Variables
+
+The application's behavior can be configured through the following environment variables.
+
+| Variable                | Description                                                                                                                            | Default Value               |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `GEMMA_MODEL_NAME`      | Specifies the name of the Gemma model to be used.                                                                                      | `gemma3:4b`                 |
+| `OLLAMA_API_BASE`       | The base URL for the Ollama API endpoint.                                                                                              | `http://localhost:10010`    |
+| `USE_OPENAI_FAKE`       | Set to `true` to use an OpenAI-compatible API wrapper around Ollama. This enables context-aware, multi-modal conversations.              | `False`                     |
+| `USE_OLLAMA_NO_CONTEXT` | Set to `true` to use the direct Ollama API for multi-modal input. Note: This mode may not retain conversational context.                 | `False`                     |
+
+#### Connection Modes
+
+The agent connects to the Ollama model in one of three ways, controlled by the boolean flags `USE_OPENAI_FAKE` and `USE_OLLAMA_NO_CONTEXT`:
+
+1.  **Default (Context-aware Chat):**
+    -   **Configuration:** `USE_OPENAI_FAKE` and `USE_OLLAMA_NO_CONTEXT` are both `False`.
+    -   **Behavior:** Uses the `ollama_chat` provider for standard, context-aware chat. According to code comments, this mode may have issues with multi-modal inputs.
+
+2.  **OpenAI Fake (Context-aware, Multi-modal):**
+    -   **Configuration:** `USE_OPENAI_FAKE=true`
+    -   **Behavior:** Routes requests through an OpenAI-compatible endpoint (`/v1`) on the Ollama server. This is the recommended mode for achieving context-aware, multi-modal chat.
+
+3.  **Ollama Direct (Multi-modal, No Context):**
+    -   **Configuration:** `USE_OLLAMA_NO_CONTEXT=true`
+    -   **Behavior:** Uses the standard `ollama` provider. This mode supports multi-modal inputs directly but may fail to retain conversation history.
 
 ## Test Your Agent's health
 
