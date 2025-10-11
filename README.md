@@ -52,6 +52,21 @@ gcloud config set run/region europe-west1
 
 # Enable APIs
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com aiplatform.googleapis.com
+
+# Ensure some default permissions exist in the project for `gcloud run deploy` are correctly set; Primarily Cloud Build
+export PROJECT_NUMBER=$(gcloud projects describe $(gcloud config get-value project) --format="value(projectNumber)")
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+	--role roles/run.viewer \
+	--member "serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+	--role roles/storage.objectAdmin \
+	--member "serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+	--role roles/artifactregistry.createOnPushRepoAdmin \
+	--member "serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+	--role roles/logging.logWriter \
+	--member "serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
 ```
 
 ## Deploy Gemma Backend
@@ -73,10 +88,16 @@ gcloud run deploy ollama-gemma3-4b-gpu \
   --no-gpu-zonal-redundancy \
   --timeout=600
 
+# Disable Invoker IAM check
+gcloud run services update ollama-gemma3-4b-gpu --no-invoker-iam-check
 
 ## download ollama utility and test the Cloud Run GPU service that is created
-curl -fsSL https://ollama.com/install.sh
-OLLAMA_HOST=<Cloud Run SERVICE URL generated above> ollama run gemma3:4b
+#curl -fsSL https://ollama.com/install.sh
+#OLLAMA_HOST=<Cloud Run SERVICE URL generated above> ollama run gemma3:4b
+export OLLAMA_URL=$(gcloud run services describe ollama-gemma3-4b-gpu \
+  --region europe-west1 \
+  --format='value(status.url)')
+curl "$OLLAMA_URL"
 ```
 
 ## Deploy ADK Cloud Run Agent that calls the Gemma Backend
@@ -113,6 +134,8 @@ gcloud run deploy production-adk-agent \
     --set-env-vars GOOGLE_CLOUD_LOCATION=europe-west1 \
     --set-env-vars GEMMA_MODEL_NAME=gemma3:4b \
     --set-env-vars OLLAMA_API_BASE=$OLLAMA_URL
+
+gcloud run services update production-adk-agent --no-invoker-iam-check
 ```
 
 ## Test Your Agent's health
