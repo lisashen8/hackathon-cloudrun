@@ -14,14 +14,14 @@
 
 import os
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
-from dotenv import load_dotenv
-from google.adk.agents import LlmAgent, Agent
-from google.adk.tools import google_search
-from google.adk.models.lite_llm import LiteLlm
-from google.cloud import logging as google_cloud_logging
 import google.auth
+from dotenv import load_dotenv
+from google.adk.agents import Agent, LlmAgent
+from google.adk.models.lite_llm import LiteLlm
+from google.adk.tools import google_search
+from google.cloud import logging as google_cloud_logging
 
 # Load environment variables from .env file in root directory
 root_dir = Path(__file__).parent.parent
@@ -53,7 +53,7 @@ api_base = os.getenv("OLLAMA_API_BASE", "http://localhost:10010")  # Location of
 # 2. Creates a simple conversational agent
 # 3. Configures Google Cloud integration
 production_agent = Agent(
-    model=LiteLlm(model=f"ollama_chat/{gemma_model_name}", api_base=api_base),
+    model=LiteLlm(model=f"ollama/{gemma_model_name}", api_base=api_base),
     name="production_agent",
     description="A production-ready conversational assistant powered by GPU-accelerated Gemma.",
     instruction="""You are 'Gem', a friendly, knowledgeable, and enthusiastic zoo tour guide. 
